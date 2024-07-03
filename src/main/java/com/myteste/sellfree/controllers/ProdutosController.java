@@ -34,12 +34,22 @@ public class ProdutosController {
 	@Autowired
 	private ProdutosRepository repo;
 	
-	@GetMapping({"","/"})
-	public String mostraListaProduto(Model model) {
-		List<Produto> produtos = repo.findAll(Sort.by(Sort.Direction.DESC,"id"));
-		model.addAttribute("produtos", produtos);
-	    return "produtos/index"; // Replace with the actual name of your view/template
-	}
+	@GetMapping({"", "/"})
+    public String mostraListaProduto(@RequestParam(name = "paramBuscaProduto", required = false) String paramBuscaProduto,
+                                     Model model) {
+        List<Produto> produtos;
+        if (paramBuscaProduto != null && !paramBuscaProduto.isEmpty()) {
+            produtos = repo.findByBrandContaining(paramBuscaProduto);
+            if (produtos.isEmpty()) {
+                produtos = repo.findByNomeContaining(paramBuscaProduto);
+            }
+        } else {
+            produtos = repo.findAll(Sort.by(Sort.Direction.DESC, "id"));
+        }
+        model.addAttribute("produtos", produtos);
+        return "produtos/index";
+    }
+
 	
 	@GetMapping({"/criar"})
 	public String mostrarFormProduto(Model model) {
